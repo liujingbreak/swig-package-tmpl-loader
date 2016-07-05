@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.4.1",
+    "require-injector": "^0.4.0",
     "shelljs": "^0.7.0",
     "swig": "^1.4.2"
   },
@@ -21,10 +22,10 @@
   },
   "homepage": "https://github.com/dr-web-house/swig-package-tmpl-loader#readme",
   "keywords": [
-	"swig",
-	"template",
-	"path",
-	"resolve"
+    "swig",
+    "template",
+    "path",
+    "resolve"
   ],
   "engines": {
     "node": ">=4.0.0"
