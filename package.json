@@ -1,0 +1,34 @@
+{
+  "name": "swig-package-tmpl-loader",
+  "version": "1.0.0",
+  "description": "Customized swig template filesystem loader which can load template from other packages",
+  "main": "swigTemplateLoader.js",
+  "dependencies": {
+    "mothership": "^0.3.0",
+    "lodash": "^4.13.1"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "shelljs": "^0.7.0",
+    "swig": "^1.4.2"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/jasmine",
+    "test-web-fun-house": "gulp test -p swig-package-tmpl-loader"
+  },
+  "bugs": {
+    "url": "https://github.com/dr-web-house/swig-package-tmpl-loader/issues"
+  },
+  "homepage": "https://github.com/dr-web-house/swig-package-tmpl-loader#readme",
+  "keywords": [
+	"swig",
+	"template",
+	"path",
+	"resolve"
+  ],
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "author": "Liu Jing",
+  "license": "MIT"
+}
