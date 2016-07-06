@@ -65,36 +65,41 @@ function resolvePackage(packageName) {
 var pNamePat = /(?:@[^\/]+\/)?([^\/]+)/;
 
 function resolveTo(to, from, _resolvePackage) {
-	var prefixLen = this.opts.prefix.length;
-	var matched = pNamePat.exec(to.substring(prefixLen));
-	if (!matched)
-		throw new Error('Invalid package path in ' + to);
-	var packageNameEnd = prefixLen + matched[0].length;
-	var packageName = matched[0];
-	var packagePath;
+	try {
+		var prefixLen = this.opts.prefix.length;
+		var matched = pNamePat.exec(to.substring(prefixLen));
+		if (!matched)
+			throw new Error('Invalid package path in ' + to);
+		var packageNameEnd = prefixLen + matched[0].length;
+		var packageName = matched[0];
+		var packagePath;
 
-	if (_.has(this.opts, 'injector')) {
-		var fm = this.opts.injector.factoryMapForFile(from);
-		if (!from) {
-			throw new Error('from is null');
-		}
-		if (fm) {
-			var injectMap = fm.getInjector(packageName);
-			if (_.has(injectMap, 'substitute')) {
-				packagePath = _resolvePackage(injectMap.substitute);
-			} else if (_.has(injectMap, 'swigTemplateDir')) {
-				packagePath = Path.resolve(injectMap.swigTemplateDir);
-				if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
-					packagePath = packagePath.substring(0, packagePath.length - 1);
-			} else {
-				packagePath = _resolvePackage(packageName);
+		if (_.has(this.opts, 'injector')) {
+			var fm = this.opts.injector.factoryMapForFile(from);
+			if (!from) {
+				throw new Error('from is null');
 			}
+			if (fm) {
+				var injectMap = fm.getInjector(packageName);
+				if (_.has(injectMap, 'substitute')) {
+					packagePath = _resolvePackage(injectMap.substitute);
+				} else if (_.has(injectMap, 'swigTemplateDir')) {
+					packagePath = Path.resolve(injectMap.swigTemplateDir);
+					if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
+						packagePath = packagePath.substring(0, packagePath.length - 1);
+				} else {
+					packagePath = _resolvePackage(packageName);
+				}
+			}
+		} else {
+			packagePath = _resolvePackage(packageName);
 		}
-	} else {
-		packagePath = _resolvePackage(packageName);
-	}
 
-	var resolveTo = packagePath + to.substring(packageNameEnd);
-	//console.log('trying to resolve npm path:', to, ', target package', packageName, '-->', resolveTo);
-	return resolveTo;
+		var resolveTo = packagePath + to.substring(packageNameEnd);
+		//console.log('trying to resolve npm path:', to, ', target package', packageName, '-->', resolveTo);
+		return resolveTo;
+	} catch (e) {
+		e.message = 'Failed to resolve ' + to + ' from ' + from + ', ' + e.message;
+		throw e;
+	}
 }
