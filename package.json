@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.4.1",
-    "require-injector": "^0.4.0",
+    "require-injector": "^0.4.1",
     "shelljs": "^0.7.0",
     "swig": "^1.4.2"
   },
