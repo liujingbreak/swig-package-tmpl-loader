@@ -1,6 +1,6 @@
 {
   "name": "swig-package-tmpl-loader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Customized swig template filesystem loader which can load template from other packages",
   "main": "swigTemplateLoader.js",
   "dependencies": {
@@ -16,6 +16,10 @@
   "scripts": {
     "test": "node_modules/.bin/jasmine",
     "test-web-fun-house": "gulp test -p swig-package-tmpl-loader"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dr-web-house/swig-package-tmpl-loader.git"
   },
   "bugs": {
     "url": "https://github.com/dr-web-house/swig-package-tmpl-loader/issues"
