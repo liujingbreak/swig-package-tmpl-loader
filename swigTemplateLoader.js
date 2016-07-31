@@ -76,9 +76,6 @@ function resolveTo(to, from, _resolvePackage) {
 
 		if (_.has(this.opts, 'injector')) {
 			var fm = this.opts.injector.factoryMapForFile(from);
-			if (!from) {
-				throw new Error('from is null');
-			}
 			if (fm) {
 				var injectMap = fm.getInjector(packageName);
 				if (_.has(injectMap, 'substitute')) {
@@ -87,13 +84,11 @@ function resolveTo(to, from, _resolvePackage) {
 					packagePath = Path.resolve(injectMap.swigTemplateDir);
 					if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
 						packagePath = packagePath.substring(0, packagePath.length - 1);
-				} else {
-					packagePath = _resolvePackage(packageName);
 				}
 			}
-		} else {
-			packagePath = _resolvePackage(packageName);
 		}
+		if (!packagePath)
+			packagePath = _resolvePackage(packageName);
 
 		var resolveTo = packagePath + to.substring(packageNameEnd);
 		//console.log('trying to resolve npm path:', to, ', target package', packageName, '-->', resolveTo);
