@@ -9,7 +9,7 @@ describe('swig-template-loader', ()=> {
 		shell.cp('-rf', 'spec/node_modules/*', 'node_modules');
 	});
 
-	it('.resolveTo(to) should work', ()=> {
+	xit('.resolveTo(to) should work', ()=> {
 		var foo = {
 			opts: {
 				prefix: 'npm://'

@@ -20,13 +20,13 @@ exports.createLoader = function(swig, basepath, encoding, opts) {
 		prefix: 'npm://'
 	}, opts ? opts : {});
 	var originLoader = swig.loaders.fs.apply(swig.loaders, [].slice.call(arguments, 1, 3));
-	var _resolvePackage = (opts.memoize !== false ) ? _.memoize(resolvePackage) : resolvePackage ;
+	//var _resolvePackage = (opts.memoize !== false ) ? _.memoize(resolvePackage) : resolvePackage ;
 
 	return {
 		opts,
 		resolve: function(to, from) {
 			if (_.startsWith(to, opts.prefix)) {
-				return originLoader.resolve.call(this, this.resolveTo(to, from, _resolvePackage), from);
+				return originLoader.resolve.call(this, this.resolveTo(to, from), from);
 			}
 			return originLoader.resolve.apply(this, arguments);
 		},
@@ -47,52 +47,49 @@ exports.swigSetup = function(swig, opts) {
 };
 
 exports.testable = {
-	resolveTo: resolveTo,
-	resolvePackage: resolvePackage
+	resolveTo: resolveTo
+	//resolvePackage: resolvePackage
 };
 
-function resolvePackage(packageName) {
-	var mainJsPath = require.resolve(packageName);
-	var jsonPath = mothership(mainJsPath, function(json) {
-		return json.name === packageName;
-	}).path;
-	if (jsonPath == null) {
-		throw new Error(packageName + ' is not Found');
-	}
-	return Path.dirname(jsonPath);
-}
+// function resolvePackage(packageName) {
+// 	var mainJsPath = require.resolve(packageName);
+// 	var jsonPath = mothership(mainJsPath, function(json) {
+// 		return json.name === packageName;
+// 	}).path;
+// 	if (jsonPath == null) {
+// 		throw new Error(packageName + ' is not Found');
+// 	}
+// 	return Path.dirname(jsonPath);
+// }
 
-var pNamePat = /(?:@[^\/]+\/)?([^\/]+)/;
+var pNamePat = /^(?:@[^\/]+\/)?([^\/]+)/;
 
-function resolveTo(to, from, _resolvePackage) {
+function resolveTo(to, from) {
 	try {
 		var prefixLen = this.opts.prefix.length;
-		var matched = pNamePat.exec(to.substring(prefixLen));
+		var path = to.substring(prefixLen);
+		var matched = pNamePat.exec(path);
 		if (!matched)
 			throw new Error('Invalid package path in ' + to);
 		var packageNameEnd = prefixLen + matched[0].length;
 		var packageName = matched[0];
-		var packagePath;
 
 		if (_.has(this.opts, 'injector')) {
 			var fm = this.opts.injector.factoryMapForFile(from);
 			if (fm) {
 				var injectMap = fm.getInjector(packageName);
 				if (_.has(injectMap, 'substitute')) {
-					packagePath = _resolvePackage(injectMap.substitute);
+					return require.resolve(path.replace(pNamePat, injectMap.substitute));
+					//packagePath = _resolvePackage(injectMap.substitute);
 				} else if (_.has(injectMap, 'swigTemplateDir')) {
-					packagePath = Path.resolve(injectMap.swigTemplateDir);
+					var packagePath = Path.resolve(injectMap.swigTemplateDir);
 					if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
 						packagePath = packagePath.substring(0, packagePath.length - 1);
+					return packagePath + to.substring(packageNameEnd);
 				}
 			}
 		}
-		if (!packagePath)
-			packagePath = _resolvePackage(packageName);
-
-		var resolveTo = packagePath + to.substring(packageNameEnd);
-		//console.log('trying to resolve npm path:', to, ', target package', packageName, '-->', resolveTo);
-		return resolveTo;
+		return require.resolve(path);
 	} catch (e) {
 		e.message = 'Failed to resolve ' + to + ' from ' + from + ', ' + e.message;
 		throw e;
