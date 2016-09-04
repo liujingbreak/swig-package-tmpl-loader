@@ -4,7 +4,6 @@
   "description": "Customized swig template filesystem loader which can load template from other packages",
   "main": "swigTemplateLoader.js",
   "dependencies": {
-    "mothership": "^0.3.0",
     "lodash": "^4.13.1"
   },
   "devDependencies": {

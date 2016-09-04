@@ -3,7 +3,6 @@
 //var log = require('log4js').getLogger(api.packageName);
 var _ = require('lodash');
 var Path = require('path');
-var mothership = require('mothership').sync;
 
 /**
  * create loader
@@ -54,19 +53,7 @@ exports.resolveTo = function(to, from, injector) {
 };
 exports.testable = {
 	resolveTo: resolveTo
-	//resolvePackage: resolvePackage
 };
-
-// function resolvePackage(packageName) {
-// 	var mainJsPath = require.resolve(packageName);
-// 	var jsonPath = mothership(mainJsPath, function(json) {
-// 		return json.name === packageName;
-// 	}).path;
-// 	if (jsonPath == null) {
-// 		throw new Error(packageName + ' is not Found');
-// 	}
-// 	return Path.dirname(jsonPath);
-// }
 
 var pNamePat = /^(?:@[^\/]+\/)?([^\/]+)/;
 
