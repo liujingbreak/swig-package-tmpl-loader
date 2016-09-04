@@ -45,7 +45,13 @@ exports.createLoader = function(swig, basepath, encoding, opts) {
 exports.swigSetup = function(swig, opts) {
 	swig.setDefaults({loader: exports.createLoader(swig, undefined, undefined, opts)});
 };
-
+exports.resolveTo = function(to, from, injector) {
+	it.opts = {
+		prefix: 'npm://',
+		injector: injector
+	};
+	return it.resolveTo(to, from);
+};
 exports.testable = {
 	resolveTo: resolveTo
 	//resolvePackage: resolvePackage
