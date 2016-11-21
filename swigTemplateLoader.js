@@ -70,15 +70,21 @@ function resolveTo(to, from) {
 		if (_.has(this.opts, 'injector')) {
 			var fm = this.opts.injector.factoryMapForFile(from);
 			if (fm) {
-				var injectMap = fm.getInjector(packageName);
-				if (_.has(injectMap, 'substitute')) {
-					return require.resolve(path.replace(pNamePat, injectMap.substitute));
-					//packagePath = _resolvePackage(injectMap.substitute);
-				} else if (_.has(injectMap, 'swigTemplateDir')) {
-					var packagePath = Path.resolve(injectMap.swigTemplateDir);
-					if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
-						packagePath = packagePath.substring(0, packagePath.length - 1);
-					return packagePath + to.substring(packageNameEnd);
+				var ijSetting = fm.matchRequire(packageName);
+				if (ijSetting) {
+					if (ijSetting.method === 'substitute') {
+						if (_.isFunction(ijSetting.value))
+							return require.resolve(path.replace(pNamePat, ijSetting.value(from, ijSetting.execResult)));
+						else
+							return require.resolve(path.replace(pNamePat, ijSetting.value));
+					} else if (ijSetting.method === 'swigTemplateDir') {
+						var packagePath = Path.resolve(_.isFunction(ijSetting.value) ?
+								ijSetting.value(from, ijSetting.execResult) :
+								ijSetting.value);
+						if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
+							packagePath = packagePath.substring(0, packagePath.length - 1);
+						return packagePath + to.substring(packageNameEnd);
+					}
 				}
 			}
 		}
