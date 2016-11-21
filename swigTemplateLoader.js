@@ -45,11 +45,14 @@ exports.swigSetup = function(swig, opts) {
 	swig.setDefaults({loader: exports.createLoader(swig, undefined, undefined, opts)});
 };
 exports.resolveTo = function(to, from, injector) {
-	it.opts = {
-		prefix: 'npm://',
-		injector: injector
+	var tempObj = {
+		opts: {
+			prefix: 'npm://',
+			injector: injector
+		},
+		resolveTo: resolveTo
 	};
-	return it.resolveTo(to, from);
+	return tempObj.resolveTo(to, from);
 };
 exports.testable = {
 	resolveTo: resolveTo
