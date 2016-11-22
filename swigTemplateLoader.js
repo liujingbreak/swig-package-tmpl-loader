@@ -1,19 +1,19 @@
-//var swig = require('swig');
-//var api = require('__api');
-//var log = require('log4js').getLogger(api.packageName);
 var _ = require('lodash');
 var Path = require('path');
+var fs = require('fs');
 
 /**
  * create loader
- * @param  {object} swig     The require('swig') instance
+ * @param  {object} swig	 The require('swig') instance
  * @param  {string} basepath Same as swig.loaders.fs
  * @param  {string} encoding Same as swig.loaders.fs
  * @param  {boolean} opts.memoize True if use _.memoize() to cache require.resolve's result, default is `true`
  * @param {boolean} opts.prefix default is `npm://`
  * @param {requireInjector} opts.injector you can use with [require-injector](https://www.npmjs.com/package/require-injector)
- */
+ * @param {(file: string, content: string) => string} opts.fileContentHandler You can transform origin file content to new content
+*/
 exports.createLoader = function(swig, basepath, encoding, opts) {
+	encoding = encoding || 'utf8';
 	opts = _.assign({
 		memoize: true,
 		prefix: 'npm://'
@@ -21,7 +21,7 @@ exports.createLoader = function(swig, basepath, encoding, opts) {
 	var originLoader = swig.loaders.fs.apply(swig.loaders, [].slice.call(arguments, 1, 3));
 	//var _resolvePackage = (opts.memoize !== false ) ? _.memoize(resolvePackage) : resolvePackage ;
 
-	return {
+	var loader = {
 		opts,
 		resolve: function(to, from) {
 			if (_.startsWith(to, opts.prefix)) {
@@ -29,9 +29,25 @@ exports.createLoader = function(swig, basepath, encoding, opts) {
 			}
 			return originLoader.resolve.apply(this, arguments);
 		},
-		load: originLoader.load,
+		load: function(identifier, cb) {
+			if (!fs || (cb && !fs.readFile) || !fs.readFileSync) {
+				throw new Error('Unable to find file ' + identifier + ' because there is no filesystem to read from.');
+			}
+
+			identifier = loader.resolve(identifier);
+
+			if (cb) {
+				fs.readFile(identifier, encoding, content => {
+					cb(hackFile(identifier, content, opts.fileContentHandler));
+				});
+				return;
+			}
+			return hackFile(identifier, fs.readFileSync(identifier, encoding), opts.fileContentHandler);
+		},
 		resolveTo: resolveTo
 	};
+
+	return loader;
 };
 
 /**
@@ -40,6 +56,7 @@ exports.createLoader = function(swig, basepath, encoding, opts) {
  * @param {boolean} opts.memoize True if use _.memoize() to cache require.resolve's result, default is `true`
  * @param {boolean} opts.prefix default is `npm://`
  * @param {requireInjector} opts.injector you can use with [require-injector](https://www.npmjs.com/package/require-injector)
+ * @param {(file: string, content: string) => string} opts.fileContentHandler You can transform origin file content to new content
  */
 exports.swigSetup = function(swig, opts) {
 	swig.setDefaults({loader: exports.createLoader(swig, undefined, undefined, opts)});
@@ -57,6 +74,7 @@ exports.resolveTo = function(to, from, injector) {
 exports.testable = {
 	resolveTo: resolveTo
 };
+
 
 var pNamePat = /^(?:@[^\/]+\/)?([^\/]+)/;
 
@@ -97,3 +115,15 @@ function resolveTo(to, from) {
 		throw e;
 	}
 }
+
+function hackFile(file, content, hacker) {
+	if (hacker)
+		return hacker(file, content);
+	else
+		return content;
+}
+
+
+
+
+
