@@ -1,6 +1,6 @@
 var tmploader = require('../swigTemplateLoader.js');
 var Path = require('path');
-var swig = require('swig');
+var swig = require('swig-templates');
 var shell = require('shelljs');
 var rj = require('require-injector');
 
