@@ -89,24 +89,32 @@ function resolveTo(to, from) {
 		var packageName = matched[0];
 
 		if (_.has(this.opts, 'injector')) {
-			var fm = this.opts.injector.factoryMapForFile(from);
-			if (fm) {
-				var ijSetting = fm.matchRequire(packageName);
-				if (ijSetting) {
-					if (ijSetting.method === 'substitute') {
-						if (_.isFunction(ijSetting.value))
-							return require.resolve(path.replace(pNamePat, ijSetting.value(from, ijSetting.execResult)));
-						else
-							return require.resolve(path.replace(pNamePat, ijSetting.value));
-					} else if (ijSetting.method === 'swigTemplateDir') {
-						var packagePath = Path.resolve(_.isFunction(ijSetting.value) ?
-								ijSetting.value(from, ijSetting.execResult) :
-								ijSetting.value);
-						if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
-							packagePath = packagePath.substring(0, packagePath.length - 1);
-						return packagePath + to.substring(packageNameEnd);
+			var fmaps = this.opts.injector.factoryMapsForFile(from);
+			var resovled = null;
+			if (_.some(fmaps, fm => {
+					var ijSetting = fm.matchRequire(packageName);
+					if (ijSetting) {
+						if (ijSetting.method === 'substitute') {
+							if (_.isFunction(ijSetting.value)) {
+								resovled = require.resolve(path.replace(pNamePat, ijSetting.value(from, ijSetting.execResult)));
+							} else {
+								resovled =  require.resolve(path.replace(pNamePat, ijSetting.value));
+							}
+							return true;
+						} else if (ijSetting.method === 'swigTemplateDir') {
+							var packagePath = Path.resolve(_.isFunction(ijSetting.value) ?
+									ijSetting.value(from, ijSetting.execResult) :
+									ijSetting.value);
+							if (_.endsWith(packagePath, '/') || _.endsWith(packagePath, '\\'))
+								packagePath = packagePath.substring(0, packagePath.length - 1);
+							resovled = packagePath + to.substring(packageNameEnd);
+							return true;
+						}
 					}
-				}
+					return false;
+				})
+			) {
+				return resovled;
 			}
 		}
 		return require.resolve(path);

@@ -1,6 +1,6 @@
 {
   "name": "swig-package-tmpl-loader",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Customized swig template filesystem loader which can load template from other packages",
   "main": "swigTemplateLoader.js",
   "dependencies": {
@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.4.1",
-    "require-injector": "^1.0.0-beta.2",
+    "require-injector": "^2.0.0-rc.1",
     "shelljs": "^0.7.0",
     "swig-templates": "^2.0.2"
   },
